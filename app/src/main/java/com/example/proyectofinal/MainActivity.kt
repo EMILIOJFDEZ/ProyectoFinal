@@ -216,7 +216,7 @@ class MainActivity : ComponentActivity() {
             Pregunta(
                 "¿Que como se llama esta canción?",
                 "Tamacún - Rodrigo y Gabriela",
-                listOf("Negro y azul - Los cuates de Sinaloa", "Apocalypshit - Molotov", ""),
+                listOf("Negro y azul - Los cuates de Sinaloa", "Apocalypshit - Molotov", "Alma de guitarra - Antonio Banderas"),
                 R.drawable.heisenberg,
                 R.raw.heisenberg
             ),
@@ -429,25 +429,25 @@ class MainActivity : ComponentActivity() {
                 R.raw.suntzu
             ),
             Pregunta(
-                "",
-                "",
-                listOf("", "", ""),
-                R.drawable.rdr2,
-                R.raw.rdr2
+                "¿Quién escribió 'Matilda'?",
+                "Roald Dahl",
+                listOf("J.K. Rowling", "Dr. Seuss", "Beatrix Potter"),
+                R.drawable.matilda,
+                R.raw.matilda
             ),
             Pregunta(
-                "",
-                "",
-                listOf("", "", ""),
-                R.drawable.rdr2,
-                R.raw.rdr2
+                "¿Quién escribió La Odisea?",
+                "Homero",
+                listOf("Virgilio", "Sófocles", "Ovidio"),
+                R.drawable.odisea,
+                R.raw.odisea
             ),
             Pregunta(
-                "",
-                "",
-                listOf("", "", ""),
-                R.drawable.rdr2,
-                R.raw.rdr2
+                "¿Qué novela fue escrita por Albert Camus?",
+                "El extranjero",
+                listOf("La peste escarlata", "El túnel", "La náusea"),
+                R.drawable.camus,
+                R.raw.camus
             )
         ),
         "Geografía" to listOf(
