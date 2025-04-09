@@ -12,9 +12,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.1"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:text="Pregunta aquí" />
+        android:text="Pregunta aquí"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -34,16 +36,24 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.1"
-            android:background="#E91E63"
-            android:text="Opción A" />
+            android:background="#FFFF00"
+            android:text="Opción A"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/buttonPregunta2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.1"
-            android:background="#2196F3"
-            android:text="Opción B" />
+            android:background="#00FFFF"
+            android:text="Opción B"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -57,16 +67,23 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.1"
-            android:background="#4CAF50"
-            android:text="Opción C" />
+            android:background="#FF00FF"
+            android:text="Opción C"
+            android:textAllCaps="false"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/buttonPregunta4"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.1"
-            android:background="#FFEB3B"
-            android:text="Opción D" />
+            android:background="#00FF00"
+            android:text="Opción D"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <TextView
@@ -74,5 +91,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.1"
-        android:text="Puntuación:" />
+        android:text="Puntuación:"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 </LinearLayout>

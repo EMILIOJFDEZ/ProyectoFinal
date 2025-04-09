@@ -13,9 +13,147 @@ class MainActivity : ComponentActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
     // Variables de clase
+    private var nombre = ""
     private lateinit var juego: Juego
     private lateinit var preguntasDisponibles: MutableList<Pregunta>
     private var preguntaActualIndex = 0
+
+    // Métodos de la actividad
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.layout_nombre) // Cargar layout inicial
+        formularionombre()
+    }
+
+    private fun formularionombre() {
+        setContentView(R.layout.layout_nombre)
+        val buttonConfirmar = findViewById<Button>(R.id.buttonEnviar)
+        val buttonSalir = findViewById<Button>(R.id.buttonSalir)
+
+        buttonConfirmar.setOnClickListener { configurarBotonesLayoutCategorias() } // Salir de la app
+        buttonSalir.setOnClickListener { finish() } // Salir de la app
+    }
+
+
+
+    private fun reproducirAudio(cancionResId: Int) {
+        // Si ya hay un MediaPlayer reproduciendo, detenerlo y liberarlo
+        mediaPlayer?.let { player ->
+            if (player.isPlaying) {
+                player.stop()
+            }
+            player.reset() // Reiniciamos para reutilizarlo
+        } ?: run {
+            // Si es nulo, creamos una nueva instancia
+            mediaPlayer = MediaPlayer()
+        }
+
+        // Configuramos el MediaPlayer para reproducir el recurso de audio de manera asíncrona
+        try {
+            val afd = resources.openRawResourceFd(cancionResId)
+            mediaPlayer?.apply {
+                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                afd.close()
+                isLooping = true // Hacer que el audio se reproduzca en bucle
+                setOnPreparedListener { mp -> mp.start() }
+                prepareAsync() // Prepara el audio de manera asíncrona
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // Configura los botones del layout inicial
+    private fun configurarBotonesLayoutCategorias() {
+
+        setContentView(R.layout.layout_categorias)
+        val buttonVideojuegos = findViewById<Button>(R.id.buttonVideojuegos)
+        val buttonPeliculas = findViewById<Button>(R.id.buttonPeliculas)
+        val buttonMusica = findViewById<Button>(R.id.buttonMusica)
+        val buttonHistoria = findViewById<Button>(R.id.buttonHistoria)
+        val buttonLiteratura = findViewById<Button>(R.id.buttonLiteratura)
+        val buttonGeografia = findViewById<Button>(R.id.buttonGeografia)
+        val buttonSalir = findViewById<Button>(R.id.buttonSalir)
+        val buttonVolver = findViewById<Button>(R.id.buttonVolver)
+
+        buttonVideojuegos.setOnClickListener { iniciarJuego("Videojuegos") }
+        buttonPeliculas.setOnClickListener { iniciarJuego("Peliculas") }
+        buttonMusica.setOnClickListener { iniciarJuego("Música") }
+        buttonHistoria.setOnClickListener { iniciarJuego("Historia") }
+        buttonLiteratura.setOnClickListener { iniciarJuego("Literatura") }
+        buttonGeografia.setOnClickListener { iniciarJuego("Geografía") }
+        buttonSalir.setOnClickListener { finish() }
+        buttonSalir.setOnClickListener { formularionombre() }
+    }
+
+    // Modificar iniciarJuego para detener audio antes de cambiar de pantalla
+    private fun iniciarJuego(tematica: String) {
+        detenerAudio() // Detener cualquier audio en reproducción
+        juego = Juego()
+
+        val preguntasCategoria = listaPreguntas[tematica] ?: emptyList()
+        preguntasDisponibles = preguntasCategoria.shuffled().toMutableList()
+
+        setContentView(R.layout.layout_cuestionario)
+        mostrarSiguientePregunta()
+    }
+
+    // Modificar mostrarSiguientePregunta para detener audio antes de volver al inicio
+    private fun mostrarSiguientePregunta() {
+        if (preguntaActualIndex >= preguntasDisponibles.size) {
+            detenerAudio() // Detener el audio antes de volver al menú
+            preguntaActualIndex = 0
+            juego = Juego()
+            configurarBotonesLayoutCategorias()
+        } else {
+            val preguntaActual = preguntasDisponibles[preguntaActualIndex]
+            actualizarUI(preguntaActual)
+        }
+    }
+
+    private fun actualizarUI(pregunta: Pregunta) {
+        // Actualizar texto de pregunta y puntos
+        findViewById<TextView>(R.id.textViewPregunta).text = pregunta.pregunta
+        findViewById<TextView>(R.id.textViewPuntos).text = "Puntuación: ${juego.obtenerPuntos()}"
+
+        // Actualizar imagen
+        val imageView = findViewById<ImageView>(R.id.imageView)
+        imageView.setImageResource(pregunta.imagenResId)
+
+        // Reproducir la canción asociada de forma asíncrona
+        reproducirAudio(pregunta.cancionResId)
+
+        // Configurar botones de opciones
+        val botones = listOf(
+            findViewById<Button>(R.id.buttonPregunta1),
+            findViewById<Button>(R.id.buttonPregunta2),
+            findViewById<Button>(R.id.buttonPregunta3),
+            findViewById<Button>(R.id.buttonPregunta4)
+        )
+
+        val opciones = pregunta.obtenerOpciones()
+
+        botones.forEachIndexed { index, boton ->
+            boton.text = opciones[index]
+            boton.setOnClickListener {
+                if (opciones[index] == pregunta.respuestaCorrecta) {
+                    juego.sumarPuntos()
+                }
+                preguntaActualIndex++
+                mostrarSiguientePregunta()
+            }
+        }
+    }
+
+    private fun detenerAudio() {
+        mediaPlayer?.let { player ->
+            if (player.isPlaying) {
+                player.stop()
+            }
+            player.release()
+        }
+        mediaPlayer = null
+    }
 
     // Preguntas organizadas por categoría
     private val listaPreguntas = mapOf(
@@ -527,127 +665,4 @@ class MainActivity : ComponentActivity() {
             )
         )
     )
-    private fun reproducirAudio(cancionResId: Int) {
-        // Si ya hay un MediaPlayer reproduciendo, detenerlo y liberarlo
-        mediaPlayer?.let { player ->
-            if (player.isPlaying) {
-                player.stop()
-            }
-            player.reset() // Reiniciamos para reutilizarlo
-        } ?: run {
-            // Si es nulo, creamos una nueva instancia
-            mediaPlayer = MediaPlayer()
-        }
-
-        // Configuramos el MediaPlayer para reproducir el recurso de audio de manera asíncrona
-        try {
-            val afd = resources.openRawResourceFd(cancionResId)
-            mediaPlayer?.apply {
-                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                afd.close()
-                isLooping = true // Hacer que el audio se reproduzca en bucle
-                setOnPreparedListener { mp -> mp.start() }
-                prepareAsync() // Prepara el audio de manera asíncrona
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    // Configura los botones del layout inicial
-    private fun configurarBotonesLayoutInicial() {
-        val buttonVideojuegos = findViewById<Button>(R.id.button1)
-        val buttonPeliculas = findViewById<Button>(R.id.button2)
-        val buttonMusica = findViewById<Button>(R.id.button3)
-        val buttonHistoria = findViewById<Button>(R.id.button4)
-        val buttonLibros = findViewById<Button>(R.id.button5)
-        val buttonGeografia = findViewById<Button>(R.id.button6)
-        val buttonSalir = findViewById<Button>(R.id.button)
-
-        buttonVideojuegos.setOnClickListener { iniciarJuego("Videojuegos") }
-        buttonPeliculas.setOnClickListener { iniciarJuego("Peliculas") }
-        buttonMusica.setOnClickListener { iniciarJuego("Música") }
-        buttonHistoria.setOnClickListener { iniciarJuego("Historia") }
-        buttonLibros.setOnClickListener { iniciarJuego("Literatura") }
-        buttonGeografia.setOnClickListener { iniciarJuego("Geografía") }
-        buttonSalir.setOnClickListener { finish() } // Salir de la app
-    }
-
-    // Métodos de la actividad
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_inicial) // Cargar layout inicial
-
-        // Botones del layout inicial
-        configurarBotonesLayoutInicial()
-    }
-
-
-    // Modificar iniciarJuego para detener audio antes de cambiar de pantalla
-    private fun iniciarJuego(tematica: String) {
-        detenerAudio() // Detener cualquier audio en reproducción
-        juego = Juego()
-
-        val preguntasCategoria = listaPreguntas[tematica] ?: emptyList()
-        preguntasDisponibles = preguntasCategoria.shuffled().toMutableList()
-
-        setContentView(R.layout.layout_cuestionario)
-        mostrarSiguientePregunta()
-    }
-
-    // Modificar mostrarSiguientePregunta para detener audio antes de volver al inicio
-    private fun mostrarSiguientePregunta() {
-        if (preguntaActualIndex >= preguntasDisponibles.size) {
-            detenerAudio() // Detener el audio antes de volver al menú
-            preguntaActualIndex = 0
-            setContentView(R.layout.layout_inicial)
-            juego = Juego()
-            configurarBotonesLayoutInicial()
-        } else {
-            val preguntaActual = preguntasDisponibles[preguntaActualIndex]
-            actualizarUI(preguntaActual)
-        }
-    }
-
-    private fun actualizarUI(pregunta: Pregunta) {
-        // Actualizar texto de pregunta y puntos
-        findViewById<TextView>(R.id.textViewPregunta).text = pregunta.pregunta
-        findViewById<TextView>(R.id.textViewPuntos).text = "Puntuación: ${juego.obtenerPuntos()}"
-
-        // Actualizar imagen
-        val imageView = findViewById<ImageView>(R.id.imageView)
-        imageView.setImageResource(pregunta.imagenResId)
-
-        // Reproducir la canción asociada de forma asíncrona
-        reproducirAudio(pregunta.cancionResId)
-
-        // Configurar botones de opciones
-        val botones = listOf(
-            findViewById<Button>(R.id.buttonPregunta1),
-            findViewById<Button>(R.id.buttonPregunta2),
-            findViewById<Button>(R.id.buttonPregunta3),
-            findViewById<Button>(R.id.buttonPregunta4)
-        )
-        val opciones = pregunta.obtenerOpciones()
-
-        botones.forEachIndexed { index, boton ->
-            boton.text = opciones[index]
-            boton.setOnClickListener {
-                if (opciones[index] == pregunta.respuestaCorrecta) {
-                    juego.sumarPuntos()
-                }
-                preguntaActualIndex++
-                mostrarSiguientePregunta()
-            }
-        }
-    }
-    private fun detenerAudio() {
-        mediaPlayer?.let { player ->
-            if (player.isPlaying) {
-                player.stop()
-            }
-            player.release()
-        }
-        mediaPlayer = null
-    }
 }
