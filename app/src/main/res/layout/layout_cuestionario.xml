@@ -10,8 +10,9 @@
     <TextView
         android:id="@+id/textViewPregunta"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
         android:text="Pregunta aquí"
         android:textAllCaps="false"
         android:textColor="#000000"
@@ -21,21 +22,21 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.4"
+        android:layout_height="match_parent"
+        android:layout_weight="0.7"
         tools:src="@tools:sample/avatars" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.2"
+        android:layout_height="match_parent"
+        android:layout_weight="0.9"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/buttonPregunta1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.1"
+            android:layout_weight="1"
             android:background="#FFFF00"
             android:text="Opción A"
             android:textAllCaps="false"
@@ -47,7 +48,7 @@
             android:id="@+id/buttonPregunta2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.1"
+            android:layout_weight="1"
             android:background="#00FFFF"
             android:text="Opción B"
             android:textAllCaps="false"
@@ -58,15 +59,15 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.2"
+        android:layout_height="match_parent"
+        android:layout_weight="0.9"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/buttonPregunta3"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.1"
+            android:layout_weight="1"
             android:background="#FF00FF"
             android:text="Opción C"
             android:textAllCaps="false"
@@ -77,7 +78,7 @@
             android:id="@+id/buttonPregunta4"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.1"
+            android:layout_weight="1"
             android:background="#00FF00"
             android:text="Opción D"
             android:textAllCaps="false"
@@ -89,11 +90,40 @@
     <TextView
         android:id="@+id/textViewPuntos"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
         android:text="Puntuación:"
+        android:textAlignment="viewStart"
         android:textAllCaps="false"
         android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonCuestionario"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FFFF00"
+            android:text="Salir del test"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonSalir"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FF0000"
+            android:text="Cerrar la app"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </LinearLayout>

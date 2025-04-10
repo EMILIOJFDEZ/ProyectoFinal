@@ -21,20 +21,18 @@ class MainActivity : ComponentActivity() {
     // Métodos de la actividad
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_nombre) // Cargar layout inicial
-        formularionombre()
+        setContentView(R.layout.layout_login) // Cargar layout inicial
+        login()
     }
 
-    private fun formularionombre() {
-        setContentView(R.layout.layout_nombre)
+    private fun login() {
+        setContentView(R.layout.layout_login)
         val buttonConfirmar = findViewById<Button>(R.id.buttonEnviar)
         val buttonSalir = findViewById<Button>(R.id.buttonSalir)
 
         buttonConfirmar.setOnClickListener { configurarBotonesLayoutCategorias() } // Salir de la app
         buttonSalir.setOnClickListener { finish() } // Salir de la app
     }
-
-
 
     private fun reproducirAudio(cancionResId: Int) {
         // Si ya hay un MediaPlayer reproduciendo, detenerlo y liberarlo
@@ -65,7 +63,7 @@ class MainActivity : ComponentActivity() {
 
     // Configura los botones del layout inicial
     private fun configurarBotonesLayoutCategorias() {
-
+        detenerAudio()
         setContentView(R.layout.layout_categorias)
         val buttonVideojuegos = findViewById<Button>(R.id.buttonVideojuegos)
         val buttonPeliculas = findViewById<Button>(R.id.buttonPeliculas)
@@ -83,7 +81,7 @@ class MainActivity : ComponentActivity() {
         buttonLiteratura.setOnClickListener { iniciarJuego("Literatura") }
         buttonGeografia.setOnClickListener { iniciarJuego("Geografía") }
         buttonSalir.setOnClickListener { finish() }
-        buttonSalir.setOnClickListener { formularionombre() }
+        buttonVolver.setOnClickListener { login() }
     }
 
     // Modificar iniciarJuego para detener audio antes de cambiar de pantalla
@@ -112,18 +110,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun actualizarUI(pregunta: Pregunta) {
-        // Actualizar texto de pregunta y puntos
         findViewById<TextView>(R.id.textViewPregunta).text = pregunta.pregunta
         findViewById<TextView>(R.id.textViewPuntos).text = "Puntuación: ${juego.obtenerPuntos()}"
 
-        // Actualizar imagen
         val imageView = findViewById<ImageView>(R.id.imageView)
         imageView.setImageResource(pregunta.imagenResId)
 
-        // Reproducir la canción asociada de forma asíncrona
         reproducirAudio(pregunta.cancionResId)
 
-        // Configurar botones de opciones
+        val buttonCuestionario = findViewById<Button>(R.id.buttonCuestionario)
+        val buttonSalir = findViewById<Button>(R.id.buttonSalir)
+        buttonSalir.setOnClickListener { finish() }
+        buttonCuestionario.setOnClickListener { configurarBotonesLayoutCategorias() }
+
         val botones = listOf(
             findViewById<Button>(R.id.buttonPregunta1),
             findViewById<Button>(R.id.buttonPregunta2),
@@ -155,7 +154,6 @@ class MainActivity : ComponentActivity() {
         mediaPlayer = null
     }
 
-    // Preguntas organizadas por categoría
     private val listaPreguntas = mapOf(
         "Videojuegos" to listOf(
             Pregunta(
@@ -665,4 +663,5 @@ class MainActivity : ComponentActivity() {
             )
         )
     )
+
 }
