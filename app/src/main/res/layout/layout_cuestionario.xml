@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FF5353"
     android:orientation="vertical"
     android:padding="16dp">
 
@@ -37,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#FFFF00"
+            android:background="#FF7B00"
             android:text="Opción A"
             android:textAllCaps="false"
             android:textColor="#000000"

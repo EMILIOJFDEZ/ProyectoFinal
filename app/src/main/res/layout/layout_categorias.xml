@@ -2,16 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#00FF00"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button9"
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#FF00FF"
-        android:text="Elige una temática:"
-        android:textAllCaps="false"
+        android:gravity="center"
+        android:text="Elige una categoría:"
         android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -119,12 +119,12 @@
             android:id="@+id/buttonVolver"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:background="#FFFF00"
             android:text="Cerrar sesión"
             android:textColor="#000000"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_weight="1" />
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/buttonSalir"
