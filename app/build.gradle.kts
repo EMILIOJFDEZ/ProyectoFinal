@@ -1,3 +1,5 @@
+import com.android.tools.r8.internal.kt
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -40,9 +42,11 @@ android {
 }
 
 dependencies {
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
     implementation(libs.androidx.core.ktx)
+    implementation("io.coil-kt:coil:2.0.0")
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)

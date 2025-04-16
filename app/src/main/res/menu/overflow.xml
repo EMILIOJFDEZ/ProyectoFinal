@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/dificultad1"
+        android:title="Fácil" />
+    <item
+        android:id="@+id/dificultad2"
+        android:title="Medio" />
+    <item
+        android:id="@+id/dificultad3"
+        android:title="Difícil" />
+    <item
+        android:id="@+id/dificultad4"
+        android:title="Experto" />
+</menu>

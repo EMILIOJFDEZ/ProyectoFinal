@@ -1,13 +1,12 @@
 package com.example.proyectofinal.clases
 
-class Pregunta(
+data class Pregunta(
     val pregunta: String,
     val respuestaCorrecta: String,
     val respuestasIncorrectas: List<String>,
-    val imagenResId: Int,
-    val cancionResId: Int
+    val imagenBase64: String,
+    val sonidoBase64: String
 ) {
-    fun obtenerOpciones(): List<String> {
-        return (respuestasIncorrectas + respuestaCorrecta).shuffled()
-    }
+    fun obtenerOpciones(): List<String> =
+        (respuestasIncorrectas + respuestaCorrecta).shuffled()
 }
