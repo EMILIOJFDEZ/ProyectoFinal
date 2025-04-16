@@ -8,68 +8,97 @@ import androidx.activity.ComponentActivity
 import com.example.proyectofinal.clases.Juego
 import com.example.proyectofinal.clases.Pregunta
 import android.media.MediaPlayer
-import android.os.StrictMode
-import android.util.Log
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.SQLException
+import java.net.HttpURLConnection
+import java.net.URL
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
+    // Variables de clase
     private var nombre = ""
     private lateinit var juego: Juego
     private lateinit var preguntasDisponibles: MutableList<Pregunta>
     private var preguntaActualIndex = 0
-    fun getConnection(): Connection? {
-        return try {
-            val url = "jdbc:mariadb://192.168.1.134:3306/proyectofinal"
-            val user = "root"
-            val password = ""
-            val conn = DriverManager.getConnection(url, user, password)
-            Log.d("DB", "Conexión establecida correctamente")
-            conn
-        } catch (e: SQLException) {
-            Log.e("DB", "Error SQL: ${e.message}")
-            null
-        }
-    }
+
+    // Métodos de la actividad
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_login)
+        setContentView(R.layout.layout_login) // Cargar layout inicial
         login()
     }
+
     private fun login() {
         setContentView(R.layout.layout_login)
         val buttonConfirmar = findViewById<Button>(R.id.buttonEnviar)
         val buttonSalir = findViewById<Button>(R.id.buttonSalir)
-        buttonConfirmar.setOnClickListener { configurarBotonesLayoutCategorias() }
-        buttonSalir.setOnClickListener { finish() }
+
+        buttonConfirmar.setOnClickListener { configurarBotonesLayoutCategorias() } // Salir de la app
+        buttonSalir.setOnClickListener { finish() } // Salir de la app
     }
+
     private fun reproducirAudio(cancionResId: Int) {
+        // Si ya hay un MediaPlayer reproduciendo, detenerlo y liberarlo
         mediaPlayer?.let { player ->
             if (player.isPlaying) {
                 player.stop()
             }
-            player.reset()
+            player.reset() // Reiniciamos para reutilizarlo
         } ?: run {
+            // Si es nulo, creamos una nueva instancia
             mediaPlayer = MediaPlayer()
         }
+
+        // Configuramos el MediaPlayer para reproducir el recurso de audio de manera asíncrona
         try {
             val afd = resources.openRawResourceFd(cancionResId)
             mediaPlayer?.apply {
                 setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
                 afd.close()
-                isLooping = true
+                isLooping = true // Hacer que el audio se reproduzca en bucle
                 setOnPreparedListener { mp -> mp.start() }
-                prepareAsync()
+                prepareAsync() // Prepara el audio de manera asíncrona
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
+    fun llamadaHttp() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL("http://pruebaemilio.atwebpages.com/api/gestiones/leer.php")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "GET"
+
+                val inputStream = conn.inputStream
+                val reader = BufferedReader(InputStreamReader(inputStream))
+                val response = StringBuilder()
+                var line: String?
+
+                while (reader.readLine().also { line = it } != null) {
+                    response.append(line)
+                }
+
+                reader.close()
+
+                withContext(Dispatchers.Main) {
+                    println("Respuesta: ${response.toString()}")
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    println("Error: ${e.message}")
+                }
+            }
+        }
+    }
+
+    // Configura los botones del layout inicial
     private fun configurarBotonesLayoutCategorias() {
-        getConnection()
+        llamadaHttp()
         detenerAudio()
         setContentView(R.layout.layout_categorias)
         val buttonVideojuegos = findViewById<Button>(R.id.buttonVideojuegos)
@@ -80,6 +109,7 @@ class MainActivity : ComponentActivity() {
         val buttonGeografia = findViewById<Button>(R.id.buttonGeografia)
         val buttonSalir = findViewById<Button>(R.id.buttonSalir)
         val buttonVolver = findViewById<Button>(R.id.buttonVolver)
+
         buttonVideojuegos.setOnClickListener { iniciarJuego("Videojuegos") }
         buttonPeliculas.setOnClickListener { iniciarJuego("Peliculas") }
         buttonMusica.setOnClickListener { iniciarJuego("Música") }
@@ -89,47 +119,55 @@ class MainActivity : ComponentActivity() {
         buttonSalir.setOnClickListener { finish() }
         buttonVolver.setOnClickListener { login() }
     }
+
+    // Modificar iniciarJuego para detener audio antes de cambiar de pantalla
     private fun iniciarJuego(tematica: String) {
-        detenerAudio()
+        detenerAudio() // Detener cualquier audio en reproducción
         juego = Juego()
+
         val preguntasCategoria = listaPreguntas[tematica] ?: emptyList()
         preguntasDisponibles = preguntasCategoria.shuffled().toMutableList()
+
         setContentView(R.layout.layout_cuestionario)
         mostrarSiguientePregunta()
     }
+
+    // Modificar mostrarSiguientePregunta para detener audio antes de volver al inicio
     private fun mostrarSiguientePregunta() {
         if (preguntaActualIndex >= preguntasDisponibles.size) {
-            detenerAudio()
+            detenerAudio() // Detener el audio antes de volver al menú
             preguntaActualIndex = 0
-            mostrarResultados()
+            juego = Juego()
+            configurarBotonesLayoutCategorias()
         } else {
             val preguntaActual = preguntasDisponibles[preguntaActualIndex]
             actualizarUI(preguntaActual)
         }
     }
-    private fun mostrarResultados(){
-        setContentView(R.layout.layout_resultados)
-        findViewById<TextView>(R.id.textViewPuntuacion).text = juego.obtenerPuntos().toString()
-        val buttonRepetir = findViewById<Button>(R.id.buttonRepetir)
-        buttonRepetir.setOnClickListener { configurarBotonesLayoutCategorias() }
-    }
+
     private fun actualizarUI(pregunta: Pregunta) {
         findViewById<TextView>(R.id.textViewPregunta).text = pregunta.pregunta
         findViewById<TextView>(R.id.textViewPuntos).text = "Puntuación: ${juego.obtenerPuntos()}"
+
         val imageView = findViewById<ImageView>(R.id.imageView)
         imageView.setImageResource(pregunta.imagenResId)
+
         reproducirAudio(pregunta.cancionResId)
+
         val buttonCuestionario = findViewById<Button>(R.id.buttonCuestionario)
         val buttonSalir = findViewById<Button>(R.id.buttonSalir)
         buttonSalir.setOnClickListener { finish() }
         buttonCuestionario.setOnClickListener { configurarBotonesLayoutCategorias() }
+
         val botones = listOf(
             findViewById<Button>(R.id.buttonPregunta1),
             findViewById<Button>(R.id.buttonPregunta2),
             findViewById<Button>(R.id.buttonPregunta3),
             findViewById<Button>(R.id.buttonPregunta4)
         )
+
         val opciones = pregunta.obtenerOpciones()
+
         botones.forEachIndexed { index, boton ->
             boton.text = opciones[index]
             boton.setOnClickListener {
@@ -141,6 +179,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     private fun detenerAudio() {
         mediaPlayer?.let { player ->
             if (player.isPlaying) {
@@ -150,7 +189,7 @@ class MainActivity : ComponentActivity() {
         }
         mediaPlayer = null
     }
-    // Preguntas organizadas por categoría
+
     private val listaPreguntas = mapOf(
         "Videojuegos" to listOf(
             Pregunta(
