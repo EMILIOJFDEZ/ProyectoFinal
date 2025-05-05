@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00FF00"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FFFFFF"
+        android:gravity="center"
+        android:text="Elige una dificultad:"
+        android:textColor="#000000"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/buttonFacil"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#00FF00"
+        android:gravity="center"
+        android:text="Fácil"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/buttonMedio"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FFFF00"
+        android:gravity="center"
+        android:text="Medio"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/buttonDificil"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FF7F00"
+        android:gravity="center"
+        android:text="Difícil"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/buttonExperto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FF0000"
+        android:gravity="center"
+        android:text="Experto"
+        android:textSize="40sp" />
+</LinearLayout>
