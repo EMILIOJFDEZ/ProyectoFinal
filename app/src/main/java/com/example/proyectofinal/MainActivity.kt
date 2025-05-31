@@ -20,6 +20,8 @@ import android.text.TextWatcher
 import java.io.FileOutputStream
 import android.util.Base64
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.ListView
 import com.example.proyectofinal.clases.LoginResponse
 import com.example.proyectofinal.clases.Usuario
 import kotlinx.coroutines.*
@@ -77,6 +79,16 @@ class MainActivity : ComponentActivity() {
     private fun mostrarLayoutLogin() {
         try {
             setContentView(R.layout.layout_login)
+
+            val imageLogin = findViewById<ImageView>(R.id.imageViewLogin)
+            imageLogin.setImageResource(R.drawable.login)
+
+            val imageCorreo = findViewById<ImageView>(R.id.imageViewCorreo)
+            imageCorreo.setImageResource(R.drawable.correo)
+
+            val imageClave = findViewById<ImageView>(R.id.imageViewClave)
+            imageClave.setImageResource(R.drawable.clave)
+
 
             var editTextCorreo = findViewById<EditText>(R.id.editTextCorreo)
             var editTextClave  = findViewById<EditText>(R.id.editTextClave)
@@ -155,7 +167,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                     // Login OK → avanzamos
-                                    mostrarLayoutCategorias()
+                                    mostrarLayoutMenu()
                                 }
                             }
                             else -> {
@@ -243,11 +255,95 @@ class MainActivity : ComponentActivity() {
 
             findViewById<Button>(R.id.buttonSalir).setOnClickListener { finish() }
             findViewById<Button>(R.id.buttonLogout).setOnClickListener { mostrarLayoutLogin() }
+            findViewById<Button>(R.id.buttonMenu).setOnClickListener { mostrarLayoutMenu() }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error en categorias layout", e)
             Toast.makeText(this, "No se pudo cargar categorías", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun mostrarLayoutMenu(){
+        setContentView(R.layout.layout_menu)
+
+        findViewById<Button>(R.id.buttonCategorias).setOnClickListener { mostrarLayoutCategorias() }
+        findViewById<Button>(R.id.buttonSalir).setOnClickListener { finish() }
+        findViewById<Button>(R.id.buttonLogout).setOnClickListener { mostrarLayoutLogin() }
+        findViewById<Button>(R.id.buttonResultados).setOnClickListener { mostrarLayoutHistorial() }
+    }
+
+    private fun mostrarLayoutHistorial() {
+        try {
+            setContentView(R.layout.layout_historial)
+
+            val buttonCategorias = findViewById<Button>(R.id.ButtonCategorias)
+            val buttonLogout = findViewById<Button>(R.id.buttonLogout)
+            val buttonSalir = findViewById<Button>(R.id.buttonSalir)
+            val buttonMenu = findViewById<Button>(R.id.buttonMenu)
+            val listView = findViewById<ListView>(R.id.listViewResultados)
+
+            buttonCategorias.setOnClickListener { mostrarLayoutCategorias() }
+            buttonLogout.setOnClickListener { mostrarLayoutLogin() }
+            buttonSalir.setOnClickListener { finish() }
+            buttonMenu.setOnClickListener { mostrarLayoutMenu() }
+
+            val userId = usuarioActual?.Id_Usuario ?: return
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val resultados = obtenerResultadosUsuario(userId)
+
+                withContext(Dispatchers.Main) {
+                    if (resultados != null) {
+                        val adapter = ArrayAdapter(
+                            this@MainActivity,
+                            android.R.layout.simple_list_item_1,
+                            resultados
+                        )
+                        listView.adapter = adapter
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "No se pudieron obtener los resultados.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error en historial layout", e)
+            Toast.makeText(this, "Error al mostrar historial", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private suspend fun obtenerResultadosUsuario(idUsuario: Int): List<String> {
+        return try {
+            val client = OkHttpClient()
+            val url = "http://pruebaemilio.atwebpages.com/juego/resultadosporusuario.php?Id_Usuario=$idUsuario"
+            val request = Request.Builder().url(url).get().build()
+            val response = client.newCall(request).execute()
+
+            val responseBody = response.body?.string() ?: return emptyList()
+            val jsonObject = JSONObject(responseBody)
+            val resultadosArray = jsonObject.getJSONArray("RESULTADOS")
+
+            val lista = mutableListOf<String>()
+            for (i in 0 until resultadosArray.length()) {
+                val resultado = resultadosArray.getJSONObject(i)
+                val texto = """
+                Cuestionario: ${resultado.getInt("Id_Cuestionario")}
+                Fecha: ${resultado.getString("Fecha_Hora")}
+                Puntuación: ${resultado.getInt("Puntuacion")}
+                Comentario: ${resultado.getString("Comentario")}
+            """.trimIndent()
+                lista.add(texto)
+            }
+
+            lista
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error al obtener resultados", e)
+            emptyList()
+        }
+    }
+
 
     // Mostrar pantalla de dificultad
     fun mostrarLayoutDificultad() {
@@ -301,7 +397,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     // Función suspend para obtener preguntas desde API
     private suspend fun obtenerPreguntasPorCuestionario(idCuestionario: Int): List<Pregunta>? {
         return try {
@@ -440,7 +535,7 @@ class MainActivity : ComponentActivity() {
                                     "Resultado enviado correctamente.",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                mostrarLayoutCategorias()
+                                mostrarLayoutMenu()
                             } else {
                                 Toast.makeText(
                                     this@MainActivity,

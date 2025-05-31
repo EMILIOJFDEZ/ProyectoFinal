@@ -108,12 +108,13 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/buttonCategorias"
+            android:id="@+id/buttonLogout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#FFFF00"
-            android:text="Salir del test"
+            android:text="Cerrar sesión"
+            android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -123,8 +124,22 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#FF0000"
-            android:text="Cerrar la app"
+            android:text="Salir del juego"
+            android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonMenu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#00FFFF"
+            android:text="Volver al menú"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
+
 </LinearLayout>
