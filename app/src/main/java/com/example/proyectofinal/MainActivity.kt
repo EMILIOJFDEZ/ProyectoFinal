@@ -40,8 +40,6 @@ class MainActivity : ComponentActivity() {
     private var idCategoria = -1
     var lista = mutableListOf<Pregunta>()
     private var usuarioActual: Usuario? = null
-    // Reproductor de audio para sonidos en preguntas
-    private var mediaPlayer: MediaPlayer? = null
     // Variables para almacenar datos del usuario en login
     // Instancias del juego y preguntas
     private lateinit var juego: Juego
@@ -234,7 +232,6 @@ class MainActivity : ComponentActivity() {
         println("ID del tipo de usuario: " + usuarioActual!!.Id_Tipo)
 
         try {
-            detenerAudio()
             setContentView(R.layout.layout_categorias)
 
             var botones = mapOf(
@@ -363,11 +360,13 @@ class MainActivity : ComponentActivity() {
                 iniciarJuego(idCuestionario)
             }
         }
+        findViewById<Button>(R.id.buttonSalir).setOnClickListener { finish() }
+        findViewById<Button>(R.id.buttonLogout).setOnClickListener { mostrarLayoutLogin() }
+        findViewById<Button>(R.id.buttonMenu).setOnClickListener { mostrarLayoutMenu() }
     }
 
     // Iniciar juego con ID combinado
     private fun iniciarJuego(idCuestionario: Int) {
-        detenerAudio()
         juego = Juego()
 
         idCategoria = idCuestionario
@@ -385,7 +384,7 @@ class MainActivity : ComponentActivity() {
                     preguntaActualIndex = 0
                     setContentView(R.layout.layout_cuestionario)
                     findViewById<Button>(R.id.buttonSalir).setOnClickListener { finish() }
-                    findViewById<Button>(R.id.buttonCategorias).setOnClickListener { mostrarLayoutCategorias() }
+                    findViewById<Button>(R.id.buttonMenu).setOnClickListener { mostrarLayoutMenu() }
                     mostrarSiguientePregunta()
                 } else {
                     Toast.makeText(this@MainActivity, "No se cargaron preguntas", Toast.LENGTH_LONG).show()
@@ -429,8 +428,7 @@ class MainActivity : ComponentActivity() {
                         var arr = obj.getJSONArray("respuestasIncorrectas")
                         for (j in 0 until arr.length()) add(arr.getString(j))
                     },
-                    obj.getString("imagen"),
-                    obj.getString("sonido")
+                    obj.getString("imagen")
                 )
                 lista.add(preguntas)
             }
@@ -469,19 +467,6 @@ class MainActivity : ComponentActivity() {
             } else {
                 imageView.setImageResource(R.drawable.ic_launcher_background)
             }
-
-            // Manejo de sonido asociado a la pregunta
-            detenerAudio()
-            if (pregunta.sonidoBase64.isNotEmpty()) {
-                var tmp = File(cacheDir, "audio.mp3")
-                FileOutputStream(tmp).use { it.write(Base64.decode(pregunta.sonidoBase64, Base64.DEFAULT)) }
-                mediaPlayer = MediaPlayer().apply {
-                    setDataSource(tmp.absolutePath)
-                    isLooping = true
-                    prepare()
-                    start()
-                }
-            }
             // Configurar botones de opciones y manejar selección
             var opciones = pregunta.obtenerOpciones()
             listOf(
@@ -506,16 +491,16 @@ class MainActivity : ComponentActivity() {
     }
     private fun mostrarResultados() {
         try {
-            detenerAudio()
             setContentView(R.layout.layout_resultados)
             var textNombre   = findViewById<TextView>(R.id.textViewNombreFinal)
             var textPuntos   = findViewById<TextView>(R.id.textViewPuntuacion)
             var editComentario = findViewById<EditText>(R.id.editTextComentario)
-            var btnRepetir   = findViewById<Button>(R.id.buttonRepetir)
+            var btnLogout     = findViewById<Button>(R.id.buttonLogout)
+            var btnMenu   = findViewById<Button>(R.id.buttonMenu)
             var btnSalir     = findViewById<Button>(R.id.buttonSalir)
             textNombre.text = "Nombre: ${usuarioActual?.Nombre ?: "No hay ningún nombre asignado"}"
             textPuntos.text = "Puntos: ${juego?.obtenerPuntos() ?: 0}"
-            btnRepetir.setOnClickListener {
+            btnMenu.setOnClickListener {
                 var comentario = editComentario.text.toString().trim()
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
@@ -556,17 +541,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
             btnSalir.setOnClickListener { finish() }
+            btnLogout.setOnClickListener { mostrarLayoutLogin() }
         } catch (e: Exception) {
             Log.e("Resultados", "Error mostrando resultados", e)
             finish()
         }
-    }
-    // Detener y liberar recurso de audio
-    private fun detenerAudio() {
-        mediaPlayer?.let {
-            if (it.isPlaying) it.stop()
-            it.release()
-        }
-        mediaPlayer = null
     }
 }

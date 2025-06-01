@@ -18,13 +18,24 @@
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/buttonFacil"
+        android:id="@+id/buttonExperto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#00FF00"
+        android:background="#000000"
         android:gravity="center"
-        android:text="Fácil"
+        android:text="Experto"
+        android:textColor="#FF0000"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/buttonDificil"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FF0000"
+        android:gravity="center"
+        android:text="Difícil"
         android:textSize="40sp" />
 
     <Button
@@ -38,22 +49,56 @@
         android:textSize="40sp" />
 
     <Button
-        android:id="@+id/buttonDificil"
+        android:id="@+id/buttonFacil"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#FF7F00"
+        android:background="#00FF00"
         android:gravity="center"
-        android:text="Difícil"
+        android:text="Fácil"
         android:textSize="40sp" />
 
-    <Button
-        android:id="@+id/buttonExperto"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#FF0000"
-        android:gravity="center"
-        android:text="Experto"
-        android:textSize="40sp" />
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonLogout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FFFF00"
+            android:foreground="@drawable/logout"
+            android:text="Cerrar sesión"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonSalir"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FF0000"
+            android:foreground="@drawable/salir"
+            android:text="Salir del juego"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonMenu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#00FFFF"
+            android:foreground="@drawable/menu"
+            android:text="Volver al menú"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 </LinearLayout>
