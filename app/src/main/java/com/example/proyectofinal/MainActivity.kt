@@ -38,6 +38,8 @@ class MainActivity : ComponentActivity() {
     private var categoriaBase = -1
     private  var idCuestionario = -1
     private var idCategoria = -1
+    // Reproductor de audio para sonidos en preguntas
+    private var mediaPlayer: MediaPlayer? = null
     var lista = mutableListOf<Pregunta>()
     private var usuarioActual: Usuario? = null
     // Variables para almacenar datos del usuario en login
@@ -261,7 +263,6 @@ class MainActivity : ComponentActivity() {
 
     private fun mostrarLayoutMenu(){
         setContentView(R.layout.layout_menu)
-
         findViewById<Button>(R.id.buttonCategorias).setOnClickListener { mostrarLayoutCategorias() }
         findViewById<Button>(R.id.buttonSalir).setOnClickListener { finish() }
         findViewById<Button>(R.id.buttonLogout).setOnClickListener { mostrarLayoutLogin() }
@@ -358,6 +359,7 @@ class MainActivity : ComponentActivity() {
                 idCuestionario = categoriaBase + (6 * (nivelDificultad - 1))
                 println("ID Cuestionario generado: $idCuestionario")
                 iniciarJuego(idCuestionario)
+                cargarSonidoCuestionario(idCuestionario)
             }
         }
         findViewById<Button>(R.id.buttonSalir).setOnClickListener { finish() }
@@ -368,14 +370,11 @@ class MainActivity : ComponentActivity() {
     // Iniciar juego con ID combinado
     private fun iniciarJuego(idCuestionario: Int) {
         juego = Juego()
-
         idCategoria = idCuestionario
-
         if (idCategoria < 1 || idCategoria > 24) {
             Toast.makeText(this, "Categoría inválida", Toast.LENGTH_SHORT).show()
             return
         }
-
         lifecycleScope.launch {
             try {
                 var preguntas = obtenerPreguntasPorCuestionario(idCuestionario)
@@ -384,7 +383,14 @@ class MainActivity : ComponentActivity() {
                     preguntaActualIndex = 0
                     setContentView(R.layout.layout_cuestionario)
                     findViewById<Button>(R.id.buttonSalir).setOnClickListener { finish() }
-                    findViewById<Button>(R.id.buttonMenu).setOnClickListener { mostrarLayoutMenu() }
+                    findViewById<Button>(R.id.buttonMenu).setOnClickListener {
+                        detenerAudio()
+                        mostrarLayoutMenu()
+                    }
+                    findViewById<Button>(R.id.buttonLogout).setOnClickListener {
+                        detenerAudio()
+                        mostrarLayoutMenu()
+                    }
                     mostrarSiguientePregunta()
                 } else {
                     Toast.makeText(this@MainActivity, "No se cargaron preguntas", Toast.LENGTH_LONG).show()
@@ -490,6 +496,7 @@ class MainActivity : ComponentActivity() {
         }
     }
     private fun mostrarResultados() {
+        detenerAudio()
         try {
             setContentView(R.layout.layout_resultados)
             var textNombre   = findViewById<TextView>(R.id.textViewNombreFinal)
@@ -520,6 +527,7 @@ class MainActivity : ComponentActivity() {
                                     "Resultado enviado correctamente.",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                println(url)
                                 mostrarLayoutMenu()
                             } else {
                                 Toast.makeText(
@@ -546,5 +554,76 @@ class MainActivity : ComponentActivity() {
             Log.e("Resultados", "Error mostrando resultados", e)
             finish()
         }
+    }
+    private suspend fun obtenerSonidoCuestionario(idCuestionario: Int): ByteArray? {
+        return try {
+            withContext(Dispatchers.IO) {
+                val url = "http://pruebaemilio.atwebpages.com/gestiones/cuestionarios/leer.php"
+                val request = Request.Builder().url(url).build()
+                val response = OkHttpClient().newCall(request).execute()
+
+                if (!response.isSuccessful) return@withContext null
+
+                val body = response.body?.string() ?: return@withContext null
+                val jsonObj = JSONObject(body)
+                val cuestionarios = jsonObj.getJSONArray("CUESTIONARIOS")
+
+                for (i in 0 until cuestionarios.length()) {
+                    val obj = cuestionarios.getJSONObject(i)
+                    if (obj.getInt("Id_Cuestionario") == idCuestionario) {
+                        val sonidoBase64 = obj.optString("Sonido", "")
+                        if (sonidoBase64.isNotEmpty()) {
+                            return@withContext Base64.decode(sonidoBase64, Base64.DEFAULT)
+                        }
+                    }
+                }
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("SONIDO", "Error cargando sonido del cuestionario", e)
+            null
+        }
+    }
+    private fun cargarSonidoCuestionario(idCuestionario: Int) {
+        lifecycleScope.launch {
+            val sonidoBytes = obtenerSonidoCuestionario(idCuestionario)
+
+            if (sonidoBytes != null) {
+                try {
+                    val tempFile = File(cacheDir, "cuestionario_audio.mp3")
+                    FileOutputStream(tempFile).use { it.write(sonidoBytes) }
+
+                    mediaPlayer = MediaPlayer().apply {
+                        setDataSource(tempFile.absolutePath)
+                        isLooping = true
+                        prepare()
+                        start()
+                    }
+                } catch (e: Exception) {
+                    Log.e("AUDIO", "Error reproduciendo audio del cuestionario", e)
+                    cargarSonidoPorDefecto()
+                }
+            } else {
+                cargarSonidoPorDefecto()
+            }
+        }
+    }
+    private fun cargarSonidoPorDefecto() {
+        try {
+            mediaPlayer = MediaPlayer.create(this, R.raw.sonido_predeterminado).apply {
+                isLooping = true
+                start()
+            }
+        } catch (e: Exception) {
+            Log.e("AUDIO", "No se pudo reproducir sonido por defecto", e)
+        }
+    }
+    // Detener y liberar recurso de audio
+    private fun detenerAudio() {
+        mediaPlayer?.let {
+            if (it.isPlaying) it.stop()
+            it.release()
+        }
+        mediaPlayer = null
     }
 }
