@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_weight="1"
+    android:background="#00FFFF"
     android:orientation="vertical">
 
     <LinearLayout
@@ -17,6 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
+            android:background="#FFFFFF"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/login" />
 
@@ -38,9 +40,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="0.8"
-        android:background="#00FFFF"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/imageViewCorreo"
@@ -67,10 +69,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="#FFFFFF"
-            android:ems="10"
             android:fontFamily="sans-serif"
-            android:hint="manolocabezahuevo@gmail.com"
+            android:hint="usuario@email.es"
             android:inputType="text"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:textAlignment="center"
             android:textColor="#000000"
             android:textSize="20sp"
@@ -82,9 +85,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#00FFFF"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/imageViewClave"
@@ -111,7 +114,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="#FFFFFF"
-            android:ems="10"
             android:hint="12345678"
             android:inputType="textPassword"
             android:textAlignment="center"
