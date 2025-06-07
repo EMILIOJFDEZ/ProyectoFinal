@@ -80,13 +80,13 @@ class MainActivity : ComponentActivity() {
         try {
             setContentView(R.layout.layout_login)
 
-            val imageLogin = findViewById<ImageView>(R.id.imageViewLogin)
+            var imageLogin = findViewById<ImageView>(R.id.imageViewLogin)
             imageLogin.setImageResource(R.drawable.login)
 
-            val imageCorreo = findViewById<ImageView>(R.id.imageViewCorreo)
+            var imageCorreo = findViewById<ImageView>(R.id.imageViewCorreo)
             imageCorreo.setImageResource(R.drawable.correo)
 
-            val imageClave = findViewById<ImageView>(R.id.imageViewClave)
+            var imageClave = findViewById<ImageView>(R.id.imageViewClave)
             imageClave.setImageResource(R.drawable.clave)
 
 
@@ -269,26 +269,70 @@ class MainActivity : ComponentActivity() {
         findViewById<Button>(R.id.buttonResultados).setOnClickListener { mostrarLayoutHistorial() }
     }
 
+    private suspend fun obtenerResultadosHistorial(): List<String> {
+        return try {
+            var client = OkHttpClient()
+            var isAdmin = usuarioActual?.Permisos?.contains("administrar", ignoreCase = true) == true
+            var url = if (isAdmin) {
+                "http://pruebaemilio.atwebpages.com/juego/leer_resultados.php"
+            } else {
+                "http://pruebaemilio.atwebpages.com/juego/resultadosporusuario.php?Id_Usuario=${usuarioActual?.Id_Usuario}"
+            }
+
+            var request = Request.Builder().url(url).get().build()
+            var response = client.newCall(request).execute()
+            var responseBody = response.body?.string() ?: return emptyList()
+
+            var lista = mutableListOf<String>()
+            var jsonObject = JSONObject(responseBody)
+            var resultadosArray = jsonObject.getJSONArray("RESULTADOS")
+
+            for (i in 0 until resultadosArray.length()) {
+                var resultado = resultadosArray.getJSONObject(i)
+                var texto = if (isAdmin) {
+                    """
+                ID del usuario: ${resultado.optString("Id_Usuario")}
+                Cuestionario: ${resultado.getInt("Id_Cuestionario")}
+                Fecha: ${resultado.getString("Fecha_Hora")}
+                Puntuación: ${resultado.getInt("Puntuacion")}
+                Comentario: ${resultado.getString("Comentario")}
+                """.trimIndent()
+                } else {
+                    """
+                Cuestionario: ${resultado.getInt("Id_Cuestionario")}
+                Fecha: ${resultado.getString("Fecha_Hora")}
+                Puntuación: ${resultado.getInt("Puntuacion")}
+                Comentario: ${resultado.getString("Comentario")}
+                """.trimIndent()
+                }
+                lista.add(texto)
+            }
+
+            lista
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error al obtener historial", e)
+            emptyList()
+        }
+    }
+
     private fun mostrarLayoutHistorial() {
         try {
             setContentView(R.layout.layout_historial)
-            val buttonLogout = findViewById<Button>(R.id.buttonLogout)
-            val buttonSalir = findViewById<Button>(R.id.buttonSalir)
-            val buttonMenu = findViewById<Button>(R.id.buttonMenu)
-            val listView = findViewById<ListView>(R.id.listViewResultados)
+            var buttonLogout = findViewById<Button>(R.id.buttonLogout)
+            var buttonSalir = findViewById<Button>(R.id.buttonSalir)
+            var buttonMenu = findViewById<Button>(R.id.buttonMenu)
+            var listView = findViewById<ListView>(R.id.listViewResultados)
 
             buttonLogout.setOnClickListener { mostrarLayoutLogin() }
             buttonSalir.setOnClickListener { finish() }
             buttonMenu.setOnClickListener { mostrarLayoutMenu() }
 
-            val userId = usuarioActual?.Id_Usuario ?: return
-
             CoroutineScope(Dispatchers.IO).launch {
-                val resultados = obtenerResultadosUsuario(userId)
+                var resultados = obtenerResultadosHistorial()
 
                 withContext(Dispatchers.Main) {
-                    if (resultados != null) {
-                        val adapter = ArrayAdapter(
+                    if (resultados.isNotEmpty()) {
+                        var adapter = ArrayAdapter(
                             this@MainActivity,
                             android.R.layout.simple_list_item_1,
                             resultados
@@ -308,37 +352,6 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Error al mostrar historial", Toast.LENGTH_SHORT).show()
         }
     }
-
-    private suspend fun obtenerResultadosUsuario(idUsuario: Int): List<String> {
-        return try {
-            val client = OkHttpClient()
-            val url = "http://pruebaemilio.atwebpages.com/juego/resultadosporusuario.php?Id_Usuario=$idUsuario"
-            val request = Request.Builder().url(url).get().build()
-            val response = client.newCall(request).execute()
-
-            val responseBody = response.body?.string() ?: return emptyList()
-            val jsonObject = JSONObject(responseBody)
-            val resultadosArray = jsonObject.getJSONArray("RESULTADOS")
-
-            val lista = mutableListOf<String>()
-            for (i in 0 until resultadosArray.length()) {
-                val resultado = resultadosArray.getJSONObject(i)
-                val texto = """
-                Cuestionario: ${resultado.getInt("Id_Cuestionario")}
-                Fecha: ${resultado.getString("Fecha_Hora")}
-                Puntuación: ${resultado.getInt("Puntuacion")}
-                Comentario: ${resultado.getString("Comentario")}
-            """.trimIndent()
-                lista.add(texto)
-            }
-
-            lista
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error al obtener resultados", e)
-            emptyList()
-        }
-    }
-
 
     // Mostrar pantalla de dificultad
     fun mostrarLayoutDificultad() {
@@ -492,16 +505,17 @@ class MainActivity : ComponentActivity() {
             mostrarResultados()
         }
     }
+
     private fun mostrarResultados() {
         detenerAudio()
         try {
             setContentView(R.layout.layout_resultados)
-            val textNombre = findViewById<TextView>(R.id.textViewNombreFinal)
-            val textPuntos = findViewById<TextView>(R.id.textViewPuntuacion)
-            val editComentario = findViewById<EditText>(R.id.editTextComentario)
-            val btnLogout = findViewById<Button>(R.id.buttonLogout)
-            val btnMenu = findViewById<Button>(R.id.buttonMenu)
-            val btnSalir = findViewById<Button>(R.id.buttonSalir)
+            var textNombre = findViewById<TextView>(R.id.textViewNombreFinal)
+            var textPuntos = findViewById<TextView>(R.id.textViewPuntuacion)
+            var editComentario = findViewById<EditText>(R.id.editTextComentario)
+            var btnLogout = findViewById<Button>(R.id.buttonLogout)
+            var btnMenu = findViewById<Button>(R.id.buttonMenu)
+            var btnSalir = findViewById<Button>(R.id.buttonSalir)
 
             textNombre.text = "Nombre: ${usuarioActual?.Nombre ?: "No hay ningún nombre asignado"}"
             textPuntos.text = "Puntos: ${juego?.obtenerPuntos() ?: 0}"
@@ -509,16 +523,16 @@ class MainActivity : ComponentActivity() {
             // Función suspendida para enviar resultados
             suspend fun enviarResultados(): Boolean {
                 return try {
-                    val client = OkHttpClient()
-                    val comentario = editComentario.text.toString().trim()
-                    val url = "http://pruebaemilio.atwebpages.com/juego/resultadospost.php" +
+                    var client = OkHttpClient()
+                    var comentario = editComentario.text.toString().trim()
+                    var url = "http://pruebaemilio.atwebpages.com/juego/resultadospost.php" +
                             "?Id_Usuario=${usuarioActual?.Id_Usuario}" +
                             "&Id_Cuestionario=$idCuestionario" +
                             "&Puntuacion=${juego?.obtenerPuntos()}" +
                             "&Comentario=${URLEncoder.encode(comentario, "UTF-8")}"
                     println(url)
-                    val request = Request.Builder().url(url).get().build()
-                    val resp = client.newCall(request).execute()
+                    var request = Request.Builder().url(url).get().build()
+                    var resp = client.newCall(request).execute()
                     withContext(Dispatchers.Main) {
                         if (resp.isSuccessful) {
                             Toast.makeText(
@@ -549,7 +563,7 @@ class MainActivity : ComponentActivity() {
 
             btnMenu.setOnClickListener {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val exito = enviarResultados()
+                    var exito = enviarResultados()
                     withContext(Dispatchers.Main) {
                         if (exito) {
                             mostrarLayoutMenu()
@@ -582,23 +596,24 @@ class MainActivity : ComponentActivity() {
             finish()
         }
     }
+
     private suspend fun obtenerSonidoCuestionario(idCuestionario: Int): ByteArray? {
         return try {
             withContext(Dispatchers.IO) {
-                val url = "http://pruebaemilio.atwebpages.com/gestiones/cuestionarios/leer.php"
-                val request = Request.Builder().url(url).build()
-                val response = OkHttpClient().newCall(request).execute()
+                var url = "http://pruebaemilio.atwebpages.com/gestiones/cuestionarios/leer.php"
+                var request = Request.Builder().url(url).build()
+                var response = OkHttpClient().newCall(request).execute()
 
                 if (!response.isSuccessful) return@withContext null
 
-                val body = response.body?.string() ?: return@withContext null
-                val jsonObj = JSONObject(body)
-                val cuestionarios = jsonObj.getJSONArray("CUESTIONARIOS")
+                var body = response.body?.string() ?: return@withContext null
+                var jsonObj = JSONObject(body)
+                var cuestionarios = jsonObj.getJSONArray("CUESTIONARIOS")
 
                 for (i in 0 until cuestionarios.length()) {
-                    val obj = cuestionarios.getJSONObject(i)
+                    var obj = cuestionarios.getJSONObject(i)
                     if (obj.getInt("Id_Cuestionario") == idCuestionario) {
-                        val sonidoBase64 = obj.optString("Sonido", "")
+                        var sonidoBase64 = obj.optString("Sonido", "")
                         if (sonidoBase64.isNotEmpty()) {
                             return@withContext Base64.decode(sonidoBase64, Base64.DEFAULT)
                         }
@@ -613,11 +628,11 @@ class MainActivity : ComponentActivity() {
     }
     private fun cargarSonidoCuestionario(idCuestionario: Int) {
         lifecycleScope.launch {
-            val sonidoBytes = obtenerSonidoCuestionario(idCuestionario)
+            var sonidoBytes = obtenerSonidoCuestionario(idCuestionario)
 
             if (sonidoBytes != null) {
                 try {
-                    val tempFile = File(cacheDir, "cuestionario_audio.mp3")
+                    var tempFile = File(cacheDir, "cuestionario_audio.mp3")
                     FileOutputStream(tempFile).use { it.write(sonidoBytes) }
 
                     mediaPlayer = MediaPlayer().apply {
