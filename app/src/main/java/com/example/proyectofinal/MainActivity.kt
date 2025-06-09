@@ -627,6 +627,8 @@ class MainActivity : ComponentActivity() {
         }
     }
     private fun cargarSonidoCuestionario(idCuestionario: Int) {
+        detenerAudio() // Detener cualquier audio en curso antes de cargar uno nuevo
+
         lifecycleScope.launch {
             var sonidoBytes = obtenerSonidoCuestionario(idCuestionario)
 
@@ -650,7 +652,10 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     private fun cargarSonidoPorDefecto() {
+        detenerAudio() // Detener cualquier instancia previa antes de crear otra
+
         try {
             mediaPlayer = MediaPlayer.create(this, R.raw.sonido_predeterminado).apply {
                 isLooping = true
@@ -660,6 +665,7 @@ class MainActivity : ComponentActivity() {
             Log.e("AUDIO", "No se pudo reproducir sonido por defecto", e)
         }
     }
+
     // Detener y liberar recurso de audio
     private fun detenerAudio() {
         mediaPlayer?.let {
